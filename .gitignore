@@ -15,3 +15,19 @@ staging-app/backend/scenes/*.json
 
 # os
 .DS_Store
+
+# ML model weights / checkpoints (downloaded at runtime)
+*.pt
+*.onnx
+weights/
+staging-app/backend/mobileclip_blt.ts
+staging-app/backend/mobileclip*
+
+# splat / capture data + pipeline outputs (large, regenerable)
+*.ply
+*.splat
+*.npy
+*.pkl
+staging-app/backend/work/
+staging-app/backend/preprocess/_debug/
+staging-app/backend/preprocess/**/__pycache__/

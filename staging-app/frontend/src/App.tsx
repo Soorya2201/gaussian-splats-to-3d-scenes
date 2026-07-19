@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { SceneCanvas } from "./three/SceneCanvas";
 import { AssetPanel } from "./ui/AssetPanel";
 import { CommandBar } from "./ui/CommandBar";
+import { ReconstructPage } from "./ui/ReconstructPage";
 import { useSceneStore } from "./store/sceneStore";
 import {
   listAssets,
@@ -13,6 +14,8 @@ import {
   type AssetEntry,
 } from "./llm/scene";
 import { loadObject } from "./three/loadObject";
+import { importReconstructedScene } from "./three/importScene";
+import { BACKEND_URL } from "./llm/api";
 import { exportSceneToGLB } from "./three/exportGLB";
 
 // Guards the ?demo=1 bootstrap against React StrictMode's double effect in dev.
@@ -23,6 +26,7 @@ function nextFrame(): Promise<void> {
 }
 
 export function App() {
+  const [page, setPage] = useState<"editor" | "reconstruct">("editor");
   const [roomUrl, setRoomUrl] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [msg, setMsg] = useState("");
@@ -185,6 +189,26 @@ export function App() {
     }
   }
 
+  async function onImportScene(scene: unknown) {
+    try {
+      const { loaded, skipped, roomUrl } = await importReconstructedScene(scene, BACKEND_URL);
+      if (roomUrl) setRoomUrl(roomUrl);
+      setSelectedId(null);
+      setSceneName("reconstructed");
+      setPage("editor");
+      setMsg(
+        `Imported ${loaded} object${loaded === 1 ? "" : "s"}` +
+          (skipped.length ? ` — ${skipped.length} skipped (GLB not in /assets yet)` : "") + ".",
+      );
+    } catch (e) {
+      setMsg(`Import failed: ${e}`);
+    }
+  }
+
+  if (page === "reconstruct") {
+    return <ReconstructPage onBack={() => setPage("editor")} onImport={onImportScene} />;
+  }
+
   return (
     <div className="app">
       <aside className="sidebar">
@@ -192,6 +216,17 @@ export function App() {
           Spatial Staging
           <small>a Blender you talk to, not click</small>
         </div>
+
+        <button
+          onClick={() => setPage("reconstruct")}
+          style={{
+            width: "100%", marginBottom: 12, background: "#22c55e", color: "#06210f",
+            fontWeight: 700, border: 0, padding: "10px 14px", borderRadius: 8,
+            cursor: "pointer", fontSize: 14,
+          }}
+        >
+          ⚡ Reconstruct from 3D splat
+        </button>
 
         <AssetPanel onSelect={setSelectedId} selectedId={selectedId} />
 

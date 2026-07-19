@@ -23,9 +23,12 @@ from schemas import (  # noqa: E402
     ValidateResponse,
 )
 from scene_store import delete_scene, list_scenes, load_scene, save_scene  # noqa: E402
+import preprocess_api  # noqa: E402
 
 ASSETS_DIR = Path(__file__).parent / "assets"
 ASSETS_DIR.mkdir(exist_ok=True)
+WORK_DIR = Path(__file__).parent / "work"
+WORK_DIR.mkdir(exist_ok=True)
 
 app = FastAPI(title="Spatial Staging Backend")
 
@@ -88,6 +91,38 @@ async def upload_asset(file: UploadFile = File(...)) -> dict:
     return {"name": _label_for(dest), "file": dest.name}
 
 
+# ---------------------------------------------------------------- reconstruction
+@app.post("/preprocess/upload")
+async def preprocess_upload(file: UploadFile = File(...)) -> dict:
+    """Accept a .ply/.splat capture, save it, and return a quick preview render."""
+    name = (file.filename or "").lower()
+    if not (name.endswith(".ply") or name.endswith(".splat")):
+        raise HTTPException(status_code=400, detail="Upload a .ply or .splat file.")
+    data = await file.read()
+    dest = preprocess_api.save_upload(file.filename, data)
+    try:
+        info = preprocess_api.preview(str(dest))
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"Could not read splat: {e}")
+    return {"splat_path": str(dest), **info}
+
+
+@app.post("/preprocess")
+def preprocess_start(body: dict) -> dict:
+    splat_path = body.get("splat_path")
+    if not splat_path or not Path(splat_path).exists():
+        raise HTTPException(status_code=400, detail="Unknown splat_path.")
+    job_id = preprocess_api.start_job(
+        splat_path, nviews=int(body.get("nviews", 12)),
+        use_flux=bool(body.get("use_flux", True)))
+    return {"job_id": job_id}
+
+
+@app.get("/preprocess/status/{job_id}")
+def preprocess_status(job_id: str) -> dict:
+    return preprocess_api.status(job_id)
+
+
 @app.post("/parse-command", response_model=Command)
 def post_parse_command(req: ParseRequest) -> Command:
     return parse_command(req.text, req.objects, req.hasRoom)
@@ -130,4 +165,5 @@ def delete_scene_endpoint(name: str = Query(...)) -> dict:
 # this were declared before the /assets and /assets/upload routes above, it would
 # intercept POST /assets/upload and reject it with 405 (StaticFiles only serves
 # GET/HEAD) before our route ever saw the request.
+app.mount("/work", StaticFiles(directory=str(WORK_DIR)), name="work")
 app.mount("/assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
