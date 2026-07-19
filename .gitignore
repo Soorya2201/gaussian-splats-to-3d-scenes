@@ -1,0 +1,17 @@
+# deps / builds
+node_modules/
+dist/
+*.tsbuildinfo
+
+# python
+venv/
+__pycache__/
+*.pyc
+
+# secrets & state
+.env
+staging-app/backend/scenes/*.json
+!staging-app/backend/scenes/.gitkeep
+
+# os
+.DS_Store

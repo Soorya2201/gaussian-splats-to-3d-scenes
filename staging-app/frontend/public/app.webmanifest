@@ -1,0 +1,16 @@
+{
+  "name": "Spatial Staging",
+  "short_name": "Staging",
+  "description": "Import a 3D room and objects, then place and edit them with text or voice.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
