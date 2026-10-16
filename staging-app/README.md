@@ -67,7 +67,7 @@ to add objects, then drive edits from the **command bar**:
 - `remove the chair`
 - `make the sofa bigger` / `scale the lamp 1.2`
 
-Voice (🎤) uses the Web Speech API — **Chromium only**; the text box is the primary path.
+Voice (the mic button) uses the Web Speech API — **Chromium only**; the text box is the primary path.
 
 ---
 
