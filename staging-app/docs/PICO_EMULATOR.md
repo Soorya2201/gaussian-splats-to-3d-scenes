@@ -75,10 +75,10 @@ Confirmed from PICO's own "Install PICO Emulator" doc
 
 | Requirement | Needed | This machine |
 |---|---|---|
-| macOS | 14.0+ | 26.3 ✓ |
-| Chip | Apple Silicon (M1 Pro+), Intel unsupported | M4 ✓ |
-| RAM | 16 GB | 16 GB ✓ (at minimum, no headroom) |
-| Free disk | 32 GB | 54 GB ✓ |
+| macOS | 14.0+ | 26.3 (meets) |
+| Chip | Apple Silicon (M1 Pro+), Intel unsupported | M4 (meets) |
+| RAM | 16 GB | 16 GB (meets) (at minimum, no headroom) |
+| Free disk | 32 GB | 54 GB (meets) |
 
 ### Why this was deferred
 
